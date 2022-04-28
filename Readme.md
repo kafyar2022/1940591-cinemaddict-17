@@ -1,7 +1,7 @@
 # Проект «Киноман»
 
 * Студент: [Ikrom Rahimov](https://up.htmlacademy.ru/ecmascript/17/user/1940591).
-* Наставник: `Неизвестно`.
+* Наставник: [Rail Sakhaviev](https://htmlacademy.ru/profile/id1331891).
 
 ---
 
