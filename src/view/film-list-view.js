@@ -25,6 +25,6 @@ export default class FilmListView {
   }
 
   addItem(element) {
-    render(element, this.getElement().children[1]);
+    render(element, this.getElement().querySelector('.films-list__container'));
   }
 }
