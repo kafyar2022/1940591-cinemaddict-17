@@ -8,13 +8,19 @@ export default class FilmPresenter {
   filmsBoard = new BoardView();
   allMovies = new FilmListView();
 
-  init = (boardContainer) => {
+  init = (boardContainer, filmsModel) => {
+    this.filmsModel = filmsModel;
+    this.boardFilms = [...this.filmsModel.getFilms()];
+
     render(this.filmsBoard, boardContainer);
     render(this.allMovies, this.filmsBoard.getElement());
 
-    for (let i = 0; i < 5; i++) {
-      this.allMovies.addItem(new FilmView());
-    }
+    // for (let i = 0; i < this.boardFilms.length; i++) {
+    //   this.allMovies.addItem(new FilmView(this.boardFilms[i]));
+    // }
+    this.boardFilms.forEach((film) => {
+      this.allMovies.addItem(new FilmView(film));
+    });
 
     render(new LoadMoreButtonView(), this.allMovies.getElement());
   };
