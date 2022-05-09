@@ -1,7 +1,7 @@
 import { createElement, render } from '../render.js';
 
 export default class FilmListView {
-  #element;
+  #element = null;
 
   get template() {
     return `<section class="films-list">
@@ -22,7 +22,7 @@ export default class FilmListView {
     this.#element = null;
   }
 
-  insertItem(filmView) {
-    render(filmView, this.#element.querySelector('.films-list__container'));
+  insertItem(filmComponent) {
+    render(filmComponent, this.#element.querySelector('.films-list__container'));
   }
 }

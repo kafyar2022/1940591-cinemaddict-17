@@ -1,7 +1,7 @@
 import { createElement } from '../render.js';
 
 export default class ProfileView {
-  #element;
+  #element = null;
 
   get template() {
     return `<section class="header__profile profile">

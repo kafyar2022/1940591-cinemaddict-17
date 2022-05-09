@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { COUNTRIES, FILMS, GENRE, NAMES } from '../const.js';
+import { AGE_RATING, COUNTRIES, FILMS, GENRE, NAMES } from '../const.js';
 import { generateRandomId, getRandomArrayElement, getRandomArrayElements, getRandomInteger } from '../util.js';
 
 const generateCommentId = generateRandomId(1, 1000000);
@@ -16,9 +16,9 @@ export const generateFilm = (_, i) => {
     'filmInfo': {
       'title': film.title,
       'alternativeTitle': film.title,
-      'totalRating': '.',
+      'totalRating': getRandomInteger(0, 10),
       'poster': film.poster,
-      'ageRating': getRandomInteger(0, 10),
+      'ageRating': getRandomArrayElement(AGE_RATING),
       'director': getRandomArrayElement(NAMES),
       'writers': getRandomArrayElements(NAMES),
       'actors': getRandomArrayElements(NAMES),

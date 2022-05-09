@@ -1,7 +1,7 @@
 import { createElement } from '../render.js';
 
 export default class MenuView {
-  #element;
+  #element = null;
 
   get template() {
     return `<nav class="main-navigation">

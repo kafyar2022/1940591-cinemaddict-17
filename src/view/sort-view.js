@@ -2,7 +2,7 @@ import { createElement } from '../render.js';
 
 
 export default class SortView {
-  #element;
+  #element = null;
 
   get template() {
     return `<ul class="sort">

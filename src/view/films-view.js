@@ -1,10 +1,10 @@
 import { createElement } from '../render.js';
 
-export default class FilmsCountView {
+export default class FilmsView {
   #element = null;
 
   get template() {
-    return '<p>130 291 movies inside</p>';
+    return '<section classs="films"></section>';
   }
 
   get element() {

@@ -51,6 +51,8 @@ const getRandomArrayElements = (array) => Array.from({ length: getRandomInteger(
 
 const getYearFromDate = (date) => dayjs(date).format('YYYY');
 
+const humanizeFilmReleseDate = (releaseDate) => dayjs(releaseDate).format('D MMMM YYYY');
+
 export {
   getRandomInteger,
   generateRandomId,
@@ -58,4 +60,5 @@ export {
   getRandomArrayElement,
   getUniqueRandomArrayElement,
   getRandomArrayElements,
+  humanizeFilmReleseDate,
 };
