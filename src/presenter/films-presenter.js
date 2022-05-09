@@ -15,9 +15,6 @@ export default class FilmPresenter {
     render(this.filmsBoard, boardContainer);
     render(this.allMovies, this.filmsBoard.getElement());
 
-    // for (let i = 0; i < this.boardFilms.length; i++) {
-    //   this.allMovies.addItem(new FilmView(this.boardFilms[i]));
-    // }
     this.boardFilms.forEach((film) => {
       this.allMovies.addItem(new FilmView(film));
     });
