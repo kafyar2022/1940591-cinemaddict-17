@@ -1,24 +1,25 @@
 import { render } from '../render.js';
-import BoardView from '../view/board-view.js';
+import FilmsContainerView from '../view/films-container-view.js';
 import FilmListView from '../view/film-list-view.js';
-import FilmView from '../view/film-view.js';
 import LoadMoreButtonView from '../view/load-more-button-view.js';
+import FilmView from '../view/film-view.js';
 
 export default class FilmPresenter {
-  filmsBoard = new BoardView();
-  allMovies = new FilmListView();
+  #films;
 
-  init = (boardContainer, filmsModel) => {
-    this.filmsModel = filmsModel;
-    this.boardFilms = [...this.filmsModel.getFilms()];
+  #filmsContainerView = new FilmsContainerView();
+  #filmListView = new FilmListView();
 
-    render(this.filmsBoard, boardContainer);
-    render(this.allMovies, this.filmsBoard.getElement());
+  init = (element, filmsModel) => {
+    this.#films = [...filmsModel.films];
 
-    this.boardFilms.forEach((film) => {
-      this.allMovies.addItem(new FilmView(film));
+    render(this.#filmsContainerView, element);
+    render(this.#filmListView, this.#filmsContainerView.element);
+
+    this.#films.forEach((film) => {
+      this.#filmListView.insertItem(new FilmView(film));
     });
 
-    render(new LoadMoreButtonView(), this.allMovies.getElement());
+    render(new LoadMoreButtonView(), this.#filmListView.element);
   };
 }

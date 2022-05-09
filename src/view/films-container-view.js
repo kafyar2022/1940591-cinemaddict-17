@@ -1,10 +1,10 @@
 import { createElement } from '../render.js';
 
-export default class LoadMoreButtonView {
+export default class FilmsContainerView {
   #element;
 
   get template() {
-    return '<button class="films-list__show-more">Show more</button>';
+    return '<section classs="films"></section>';
   }
 
   get element() {

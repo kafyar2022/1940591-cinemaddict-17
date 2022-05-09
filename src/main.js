@@ -8,8 +8,8 @@ import FilmsModel from './model/films-model.js';
 
 const siteHeaderElement = document.querySelector('.header');
 const siteMainElement = document.querySelector('.main');
-const filmsPresenter = new FilmPresenter();
 const statisticsElement = document.querySelector('.footer__statistics');
+const filmsPresenter = new FilmPresenter();
 const filmsModel = new FilmsModel();
 
 render(new ProfileView(), siteHeaderElement);
