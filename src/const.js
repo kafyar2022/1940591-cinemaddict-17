@@ -1,7 +1,9 @@
-const FILMS_QUANTITY = 5;
+const FILMS_QUANTITY = 25;
+const FILM_COUNT_PER_STEP = 5;
 const GENRE = ['Comedy', 'Mystery', 'Drama', 'Cartoon', 'Western'];
 const NAMES = ['Tom Ford', 'David Lynch', 'Martin Scorsese', 'Joel and Ethan Coen', 'Steven Soderbergh', 'Terrence Malick', 'Jack Nicholson', 'Marlon Brando', 'Denzel Washington', 'Katharine Hepburn', 'Humphrey Bogart',];
 const COUNTRIES = ['Finland', 'USA', 'Russia', 'Tajikistan', 'Germany', 'France', 'Afganistan'];
+const AGE_RATING = ['0+', '6+', '14+', '18+', '24+'];
 const FILMS = [
   {
     title: 'The Dance of Life',
@@ -45,5 +47,7 @@ export {
   GENRE,
   NAMES,
   COUNTRIES,
+  AGE_RATING,
   FILMS_QUANTITY,
+  FILM_COUNT_PER_STEP,
 };

@@ -8,13 +8,12 @@ import FilmsModel from './model/films-model.js';
 
 const siteHeaderElement = document.querySelector('.header');
 const siteMainElement = document.querySelector('.main');
-const filmsPresenter = new FilmPresenter();
 const statisticsElement = document.querySelector('.footer__statistics');
-const filmsModel = new FilmsModel();
+const filmsPresenter = new FilmPresenter(siteMainElement, new FilmsModel());
 
 render(new ProfileView(), siteHeaderElement);
 render(new MenuView(), siteMainElement);
 render(new SortView(), siteMainElement);
 render(new FilmsCountView(), statisticsElement);
 
-filmsPresenter.init(siteMainElement, filmsModel);
+filmsPresenter.init();
