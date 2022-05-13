@@ -5,10 +5,13 @@ import { generateRandomId, getRandomArrayElement, getRandomArrayElements, getRan
 const generateCommentId = generateRandomId(1, 1000000);
 const generateCommentIds = () => Array.from({ length: getRandomInteger(0, 100) }, generateCommentId);
 
+const releaseDaysGap = 90;
+const watchingDaysGap = 14;
+
 export const generateFilm = (_, i) => {
   const film = getRandomArrayElement(FILMS);
-  const releaseDate = dayjs().add(getRandomInteger(1, 90), 'day').format();
-  const watchingDate = dayjs(releaseDate).add(getRandomInteger(0, 14), 'day').format();
+  const releaseDate = dayjs().add(getRandomInteger(1, releaseDaysGap), 'day').format();
+  const watchingDate = dayjs(releaseDate).add(getRandomInteger(watchingDaysGap, 14), 'day').format();
 
   return {
     'id': i + 1,

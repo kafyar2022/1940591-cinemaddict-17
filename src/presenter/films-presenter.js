@@ -32,7 +32,7 @@ export default class FilmPresenter {
   #renderFilms = () => {
     render(this.#filmsComponent, this.#filmsContainer);
 
-    if (this.#films.length === 0) {
+    if (!this.#films.length) {
       render(new NoFilmsView(), this.#filmsContainer);
       return;
     }
