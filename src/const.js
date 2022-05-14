@@ -1,4 +1,4 @@
-const FILMS_QUANTITY = 55;
+const FILMS_QUANTITY = 23;
 const FILM_COUNT_PER_STEP = 5;
 const GENRE = ['Comedy', 'Mystery', 'Drama', 'Cartoon', 'Western'];
 const NAMES = ['Tom Ford', 'David Lynch', 'Martin Scorsese', 'Joel and Ethan Coen', 'Steven Soderbergh', 'Terrence Malick', 'Jack Nicholson', 'Marlon Brando', 'Denzel Washington', 'Katharine Hepburn', 'Humphrey Bogart',];
