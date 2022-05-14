@@ -1,4 +1,4 @@
-import { render } from '../render.js';
+import { remove, render } from '../framework/render.js';
 import FilmsContainerView from '../view/films-view.js';
 import FilmListView from '../view/film-list-view.js';
 import LoadMoreButtonView from '../view/load-more-button-view.js';
@@ -8,15 +8,15 @@ import { FILM_COUNT_PER_STEP } from '../const.js';
 import PopupView from '../view/popup-view.js';
 
 export default class FilmPresenter {
-  #films = [];
-  #filmsModel = null;
   #filmsContainer = null;
-  #renderedFilmsCount = FILM_COUNT_PER_STEP;
+  #filmsModel = null;
 
   #filmsComponent = new FilmsContainerView();
   #filmListComponent = new FilmListView();
   #loadMoreButtonComponent = new LoadMoreButtonView();
-  #popupComponent = null;
+
+  #films = [];
+  #renderedFilmsCount = FILM_COUNT_PER_STEP;
 
   constructor(filmsContainer, filmsModel) {
     this.#filmsContainer = filmsContainer;
@@ -46,47 +46,39 @@ export default class FilmPresenter {
     if (this.#films.length > FILM_COUNT_PER_STEP) {
       render(this.#loadMoreButtonComponent, this.#filmListComponent.element);
 
-      this.#loadMoreButtonComponent.element.addEventListener('click', this.#loadMoreButtonClickHandler);
+      this.#loadMoreButtonComponent.setClickHandler(this.#handleLoadMoreButtonClick);
     }
   };
 
   #renderFilm = (film) => {
     const filmComponent = new FilmView(film);
 
-    const escKeydownHandler = () => {
-      this.#popupComponent.element.remove();
-      this.#popupComponent = null;
-      document.body.classList.remove('hide-overflow');
-    };
+    filmComponent.setClickHandler(() => {
+      const popupComponent = new PopupView(film);
 
-    const closePopup = () => {
-      this.#popupComponent.element.remove();
-      this.#popupComponent = null;
+      const handleEscKeydown = (evt) => {
+        if (evt.key === 'Escape' || evt.key === 'Esc') {
+          evt.preventDefault();
+          remove(popupComponent);
+          document.removeEventListener('keydown', handleEscKeydown);
+        }
+      };
 
-      document.body.classList.remove('hide-overflow');
-      document.removeEventListener('keydown', escKeydownHandler);
-    };
+      render(popupComponent, document.body);
+      document.body.classList.add('hide-overflow');
+      document.addEventListener('keydown', handleEscKeydown);
 
-    filmComponent.element.addEventListener('click', (evt) => {
-      evt.preventDefault();
-
-      if (evt.target.closest('.film-card__link') !== null) {
-        document.addEventListener('keydown', escKeydownHandler);
-        document.body.classList.add('hide-overflow');
-
-        this.#popupComponent = new PopupView(film);
-
-        this.#popupComponent.element.querySelector('.film-details__close-btn').addEventListener('click', closePopup);
-
-        render(this.#popupComponent, document.body);
-      }
+      popupComponent.setCloseButtonClickHandler(() => {
+        remove(popupComponent);
+        document.body.classList.remove('hide-overflow');
+        document.removeEventListener('keydown', handleEscKeydown);
+      });
     });
 
     this.#filmListComponent.insertItem(filmComponent);
   };
 
-  #loadMoreButtonClickHandler = (evt) => {
-    evt.preventDefault();
+  #handleLoadMoreButtonClick = () => {
     this.#films
       .slice(this.#renderedFilmsCount, this.#renderedFilmsCount + FILM_COUNT_PER_STEP)
       .forEach((film) => this.#renderFilm(film));
