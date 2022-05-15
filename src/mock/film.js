@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import { AGE_RATING, COUNTRIES, FILMS, GENRE, NAMES } from '../const.js';
-import { generateRandomId, getRandomArrayElement, getRandomArrayElements, getRandomInteger } from '../util.js';
+import { generateRandomId, getRandomArrayElement, getRandomArrayElements, getRandomInteger } from '../utils/common.js';
 
 const generateCommentId = generateRandomId(1, 1000000);
 const generateCommentIds = () => Array.from({ length: getRandomInteger(0, 100) }, generateCommentId);

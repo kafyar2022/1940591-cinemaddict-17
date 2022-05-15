@@ -1,5 +1,3 @@
-import dayjs from 'dayjs';
-
 const getRandomInteger = (min = 1, max = 10000) => {
   const lower = Math.ceil(Math.min(Math.abs(min), Math.abs(max)));
   const upper = Math.floor(Math.max(Math.abs(min), Math.abs(max)));
@@ -49,16 +47,10 @@ const getUniqueRandomArrayElement = (array) => {
 
 const getRandomArrayElements = (array) => Array.from({ length: getRandomInteger(1, array.length) }, getUniqueRandomArrayElement(array));
 
-const getYearFromDate = (date) => dayjs(date).format('YYYY');
-
-const humanizeFilmReleseDate = (releaseDate) => dayjs(releaseDate).format('D MMMM YYYY');
-
 export {
   getRandomInteger,
   generateRandomId,
-  getYearFromDate,
   getRandomArrayElement,
   getUniqueRandomArrayElement,
   getRandomArrayElements,
-  humanizeFilmReleseDate,
 };
