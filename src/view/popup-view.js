@@ -129,15 +129,71 @@ export default class PopupView extends AbstractView {
     return createPopupTemplate(this.#film);
   }
 
-  setCloseButtonClickHandler = (cb) => {
-    this._callback.handleCloseButtonClick = cb;
+  setCloseBtnClickHandler = (cb) => {
+    this._callback.closeBtnClick = cb;
 
-    this.element.querySelector('.film-details__close-btn').addEventListener('click', this.#handleCloseButtonClick);
+    this.element.querySelector('.film-details__close-btn').addEventListener('click', this.#closeBtnClickHandler);
   };
 
-  #handleCloseButtonClick = (evt) => {
+  setEscKeydownHandler = (cb) => {
+    this._callback.escKeydown = cb;
+
+    document.addEventListener('keydown', this.#escKeydownHandler);
+  };
+
+  setWatchlistClickHandler = (cb) => {
+    this._callback.watchlistClick = cb;
+
+    this.element.querySelector('.film-details__control-button--watchlist').addEventListener('click', this.#watchlistClickHandler);
+  };
+
+  setWatchedClickHandler = (cb) => {
+    this._callback.watchedClick = cb;
+
+    this.element.querySelector('.film-details__control-button--watched').addEventListener('click', this.#watchedClickHandler);
+  };
+
+  setFavoriteClickHandler = (cb) => {
+    this._callback.favoriteClick = cb;
+
+    this.element.querySelector('.film-details__control-button--favorite').addEventListener('click', this.#favoriteClickHandler);
+  };
+
+  toggleWatchlistClass = () => this.element.querySelector('.film-details__control-button--watchlist').classList.toggle('film-details__control-button--active');
+
+  toggleWatchedClass = () => this.element.querySelector('.film-details__control-button--watched').classList.toggle('film-details__control-button--active');
+
+  toggleFavoriteClass = () => this.element.querySelector('.film-details__control-button--favorite').classList.toggle('film-details__control-button--active');
+
+  #closeBtnClickHandler = (evt) => {
     evt.preventDefault();
 
-    this._callback.handleCloseButtonClick();
+    this._callback.closeBtnClick();
+  };
+
+  #escKeydownHandler = (evt) => {
+    evt.preventDefault();
+
+    if (evt.key === 'Escape' || evt.key === 'Esc') {
+      this._callback.escKeydown();
+    }
+  };
+
+  #watchlistClickHandler = (evt) => {
+    evt.preventDefault();
+
+    this._callback.watchlistClick();
+  };
+
+  #watchedClickHandler = (evt) => {
+    evt.preventDefault();
+
+    this._callback.watchedClick();
+  };
+
+  #favoriteClickHandler = (evt) => {
+    evt.preventDefault();
+
+    this._callback.favoriteClick();
   };
 }

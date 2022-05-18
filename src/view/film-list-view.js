@@ -1,4 +1,3 @@
-import {render} from '../framework/render.js';
 import AbstractView from '../framework/view/abstract-view.js';
 
 const createFilmListTemplate = () => `
@@ -13,7 +12,7 @@ export default class FilmListView extends AbstractView {
     return createFilmListTemplate();
   }
 
-  insertItem(filmComponent) {
-    render(filmComponent, this.element.querySelector('.films-list__container'));
+  get filmsContainer() {
+    return this.element.querySelector('.films-list__container');
   }
 }
