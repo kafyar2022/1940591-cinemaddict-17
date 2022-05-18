@@ -1,6 +1,6 @@
 import AbstractView from '../framework/view/abstract-view.js';
 
-export default class LoadMoreButtonView extends AbstractView {
+export default class LoadMoreBtnView extends AbstractView {
   get template() {
     return '<button class="films-list__show-more">Show more</button>';
   }
