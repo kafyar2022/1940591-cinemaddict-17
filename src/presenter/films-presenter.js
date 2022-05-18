@@ -6,6 +6,7 @@ import SortView from '../view/sort-view.js';
 import NoFilmsView from '../view/no-films-view.js';
 import { FILM_COUNT_PER_STEP } from '../const.js';
 import FilmPresenter from './film-presenter.js';
+import { updateItem } from '../utils/common.js';
 
 export default class FilmsPresenter {
   #filmsContainer = null;
@@ -79,13 +80,18 @@ export default class FilmsPresenter {
   };
 
   #renderFilm = (film) => {
-    const filmPresenter = new FilmPresenter(this.#filmListComponent.filmsContainer, this.#handlePopupChange);
+    const filmPresenter = new FilmPresenter(this.#filmListComponent.filmsContainer, this.#handlePopupChange, this.#handleFilmChange);
     filmPresenter.init(film);
     this.#filmPresenter.set(film.id, filmPresenter);
   };
 
   #handlePopupChange = () => {
     this.#filmPresenter.forEach((presenter) => presenter.resetPopup());
+  };
+
+  #handleFilmChange = (updatedFilm) => {
+    this.#films = updateItem(this.#films, updatedFilm);
+    this.#filmPresenter.get(updatedFilm.id).init(updatedFilm);
   };
 
   #handleLoadMoreButtonClick = () => {
