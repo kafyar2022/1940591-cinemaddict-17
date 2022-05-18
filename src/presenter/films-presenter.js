@@ -2,13 +2,12 @@ import { remove, render } from '../framework/render.js';
 import FilmsWrapView from '../view/films-wrap-view.js';
 import FilmListView from '../view/film-list-view.js';
 import LoadMoreBtnView from '../view/load-more-btn-view.js';
-import FilmView from '../view/film-view.js';
 import SortView from '../view/sort-view.js';
 import NoFilmsView from '../view/no-films-view.js';
 import { FILM_COUNT_PER_STEP } from '../const.js';
-import PopupView from '../view/popup-view.js';
+import FilmPresenter from './film-presenter.js';
 
-export default class FilmPresenter {
+export default class FilmsPresenter {
   #filmsContainer = null;
   #filmsModel = null;
 
@@ -16,10 +15,10 @@ export default class FilmPresenter {
   #sortComponent = new SortView();
   #filmListComponent = new FilmListView();
   #loadMoreBtnComponent = new LoadMoreBtnView();
-  #popupComponent = null;
 
   #films = [];
   #renderedFilmsCount = FILM_COUNT_PER_STEP;
+  #filmPresenter = new Map();
 
   constructor(filmsContainer, filmsModel) {
     this.#filmsContainer = filmsContainer;
@@ -80,28 +79,13 @@ export default class FilmPresenter {
   };
 
   #renderFilm = (film) => {
-    const filmComponent = new FilmView(film);
-
-    filmComponent.setClickHandler(() => {
-      this.#renderPopup(film);
-    });
-
-    this.#filmListComponent.insertItem(filmComponent);
+    const filmPresenter = new FilmPresenter(this.#filmListComponent.filmsContainer, this.#handlePopupChange);
+    filmPresenter.init(film);
+    this.#filmPresenter.set(film.id, filmPresenter);
   };
 
-  #renderPopup = (film) => {
-    const prevPopup = this.#popupComponent;
-    if (prevPopup !== null) {
-      remove(prevPopup);
-    }
-
-    this.#popupComponent = new PopupView(film);
-    render(this.#popupComponent, document.body);
-
-    document.body.classList.add('hide-overflow');
-
-    this.#popupComponent.setCloseBtnClickHandler(this.#closePopup);
-    this.#popupComponent.setEscKeydownHandler(this.#closePopup);
+  #handlePopupChange = () => {
+    this.#filmPresenter.forEach((presenter) => presenter.resetPopup());
   };
 
   #handleLoadMoreButtonClick = () => {
@@ -111,10 +95,5 @@ export default class FilmPresenter {
     if (this.#renderedFilmsCount >= this.#films.length) {
       remove(this.#loadMoreBtnComponent);
     }
-  };
-
-  #closePopup = () => {
-    remove(this.#popupComponent);
-    document.body.classList.remove('hide-overflow');
   };
 }
