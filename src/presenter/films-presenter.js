@@ -4,9 +4,10 @@ import FilmListView from '../view/film-list-view.js';
 import LoadMoreBtnView from '../view/load-more-btn-view.js';
 import SortView from '../view/sort-view.js';
 import NoFilmsView from '../view/no-films-view.js';
-import { FILM_COUNT_PER_STEP } from '../const.js';
 import FilmPresenter from './film-presenter.js';
 import { updateItem } from '../utils/common.js';
+
+const FILM_COUNT_PER_STEP = 5;
 
 export default class FilmsPresenter {
   #filmsContainer = null;
@@ -18,12 +19,14 @@ export default class FilmsPresenter {
   #loadMoreBtnComponent = new LoadMoreBtnView();
 
   #films = [];
+  #comments = [];
   #renderedFilmsCount = FILM_COUNT_PER_STEP;
   #filmPresenter = new Map();
 
-  constructor(filmsContainer, filmsModel) {
+  constructor(filmsContainer, filmsModel, commentsModel) {
     this.#filmsContainer = filmsContainer;
     this.#filmsModel = filmsModel;
+    this.#comments = [...commentsModel.comments];
   }
 
   init = () => {
@@ -81,7 +84,9 @@ export default class FilmsPresenter {
 
   #renderFilm = (film) => {
     const filmPresenter = new FilmPresenter(this.#filmListComponent.filmsContainer, this.#handlePopupChange, this.#handleFilmChange);
-    filmPresenter.init(film);
+    const comments = Array.from(film.comments, (commentId) => this.#comments.find((comment) => comment.id === commentId));
+
+    filmPresenter.init(film, comments);
     this.#filmPresenter.set(film.id, filmPresenter);
   };
 

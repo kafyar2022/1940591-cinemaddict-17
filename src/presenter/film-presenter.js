@@ -1,9 +1,11 @@
 import { remove, render, replace } from '../framework/render.js';
 import FilmView from '../view/film-view.js';
 import PopupView from '../view/popup-view.js';
+import CommentsView from '../view/comments-view.js';
 
 export default class FilmPresenter {
   #film = {};
+  #comments = [];
 
   #filmContainer = null;
   #changePopup = null;
@@ -11,6 +13,7 @@ export default class FilmPresenter {
 
   #filmComponent = null;
   #popupComponent = null;
+  #commentsComponent = null;
 
 
   constructor(filmContainer, changePopup, changeData) {
@@ -19,8 +22,9 @@ export default class FilmPresenter {
     this.#changeData = changeData;
   }
 
-  init(film) {
+  init(film, comments) {
     this.#film = film;
+    this.#comments = comments;
 
     const prevFilmComponent = this.#filmComponent;
 
@@ -68,6 +72,8 @@ export default class FilmPresenter {
     this.#popupComponent.setWatchedClickHandler(this.#handleWatchedClick);
     this.#popupComponent.setFavoriteClickHandler(this.#handleFavoriteClick);
 
+    this.#renderComments();
+
     document.body.classList.add('hide-overflow');
   };
 
@@ -91,5 +97,11 @@ export default class FilmPresenter {
   #handleFavoriteClick = () => {
     this.#changeData({ ...this.#film, userDetails: { ...this.#film.userDetails, favorite: !this.#film.userDetails.favorite } });
     this.#popupComponent.toggleFavoriteClass();
+  };
+
+  #renderComments = () => {
+    this.#commentsComponent = new CommentsView(this.#comments);
+
+    render(this.#commentsComponent, this.#popupComponent.commentsContainer);
   };
 }
