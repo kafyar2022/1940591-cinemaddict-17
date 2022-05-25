@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { getYearFromDate } from '../utils/film.js';
+import { formatDuration, getYearFromDate } from '../utils/film.js';
 
 const createFilmTemplate = (film) => `
   <article class="film-card">
@@ -8,7 +8,7 @@ const createFilmTemplate = (film) => `
       <p class="film-card__rating">${Number(film.filmInfo.totalRating).toFixed(1)}</p>
       <p class="film-card__info">
         <span class="film-card__year">${getYearFromDate(film.filmInfo.release.date)}</span>
-        <span class="film-card__duration">${film.filmInfo.runtime}m</span>
+        <span class="film-card__duration">${formatDuration(film.filmInfo.runtime)}</span>
         <span class="film-card__genre">${film.filmInfo.genre.map((item) => item).join(', ')}</span>
       </p>
       <img src="./${film.filmInfo.poster}" alt="${film.filmInfo.alternativeTitle}" class="film-card__poster">
