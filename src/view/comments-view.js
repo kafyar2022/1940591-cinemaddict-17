@@ -1,3 +1,4 @@
+import he from 'he';
 import dayjs from 'dayjs';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 
@@ -5,7 +6,7 @@ const createCommentTemplate = ({ id, author, comment, date, emotion }) => `
   <li class="film-details__comment">
       ${emotion ? `<span class="film-details__comment-emoji"><img src="./images/emoji/${emotion}.png" width="55" height="55" alt="emoji-${emotion}"></span>` : '<span class="film-details__comment-emoji film-details__comment-emoji--empty"></span>'}
     <div>
-      <p class="film-details__comment-text">${comment ?? ''}</p>
+      <p class="film-details__comment-text">${he.encode(comment) ?? ''}</p>
       <p class="film-details__comment-info">
         <span class="film-details__comment-author">${author ?? ''}</span>
         <span class="film-details__comment-day">${dayjs(date).format('YYYY/MM/DD HH:mm')}</span>
