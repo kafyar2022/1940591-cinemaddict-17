@@ -652,6 +652,13 @@ button {
   margin-right: 20px;
   margin-left: 7px;
 }
+.film-details__comment-emoji--empty {
+  width: 55px;
+  border: dashed 1px #979797;
+  border-radius: 50%;
+  height: 55px;
+  background-color: rgba(255, 255, 255, 0.1);
+}
 .film-details__new-comment {
   display: flex;
   align-items: center;

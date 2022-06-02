@@ -1,60 +1,61 @@
+import dayjs from 'dayjs';
 import AbstractView from '../framework/view/abstract-view.js';
-import { humanizeFilmReleseDate } from '../utils/film.js';
+import { formatDuration } from '../utils/film.js';
 
-const createFilmInfoTemplate = (film) => `
+const createFilmInfoTemplate = ({ filmInfo }) => `
   <div class="film-details__info-wrap">
     <div class="film-details__poster">
-      <img class="film-details__poster-img" src="./${film.filmInfo.poster}" alt="${film.filmInfo.alternativeTitle}">
+      <img class="film-details__poster-img" src="./${filmInfo.poster}" alt="${filmInfo.alternativeTitle}">
 
-      <p class="film-details__age">${film.filmInfo.ageRating}</p>
+      <p class="film-details__age">${filmInfo.ageRating}</p>
     </div>
 
     <div class="film-details__info">
       <div class="film-details__info-head">
         <div class="film-details__title-wrap">
-          <h3 class="film-details__title">${film.filmInfo.title}</h3>
-          <p class="film-details__title-original">Original: ${film.filmInfo.title}</p>
+          <h3 class="film-details__title">${filmInfo.title}</h3>
+          <p class="film-details__title-original">Original: ${filmInfo.title}</p>
         </div>
 
         <div class="film-details__rating">
-          <p class="film-details__total-rating">${film.filmInfo.totalRating}</p>
+          <p class="film-details__total-rating">${Number(filmInfo.totalRating).toFixed(1)}</p>
         </div>
       </div>
 
       <table class="film-details__table">
         <tr class="film-details__row">
           <td class="film-details__term">Director</td>
-          <td class="film-details__cell">${film.filmInfo.director}</td>
+          <td class="film-details__cell">${filmInfo.director}</td>
         </tr>
         <tr class="film-details__row">
           <td class="film-details__term">Writers</td>
-          <td class="film-details__cell">${film.filmInfo.writers.map((writer) => writer).join(', ')}</td>
+          <td class="film-details__cell">${filmInfo.writers.map((writer) => writer).join(', ')}</td>
         </tr>
         <tr class="film-details__row">
           <td class="film-details__term">Actors</td>
-          <td class="film-details__cell">${film.filmInfo.actors.map((actor) => actor).join(', ')}</td>
+          <td class="film-details__cell">${filmInfo.actors.map((actor) => actor).join(', ')}</td>
         </tr>
         <tr class="film-details__row">
           <td class="film-details__term">Release Date</td>
-          <td class="film-details__cell">${humanizeFilmReleseDate(film.filmInfo.release.date)}</td>
+          <td class="film-details__cell">${dayjs(filmInfo.release.date).format('D MMMM YYYY')}</td>
         </tr>
         <tr class="film-details__row">
           <td class="film-details__term">Runtime</td>
-          <td class="film-details__cell">${film.filmInfo.runtime}</td>
+          <td class="film-details__cell">${formatDuration(filmInfo.runtime)}</td>
         </tr>
         <tr class="film-details__row">
           <td class="film-details__term">Country</td>
-          <td class="film-details__cell">${film.filmInfo.release.releaseCountry}</td>
+          <td class="film-details__cell">${filmInfo.release.releaseCountry}</td>
         </tr>
         <tr class="film-details__row">
           <td class="film-details__term">Genres</td>
           <td class="film-details__cell">
-            ${film.filmInfo.genre.map((item) => `<span class="film-details__genre">${item}</span>`).join('')}
+            <span class="film-details__genre">${filmInfo.genre.map((item) => item).join(', ')}</span>
           </td>
         </tr>
       </table>
 
-      <p class="film-details__film-description">${film.filmInfo.description}</p>
+      <p class="film-details__film-description">${filmInfo.description}</p>
     </div>
   </div>
 `;
@@ -127,22 +128,18 @@ export default class PopupView extends AbstractView {
     this.element.querySelector('.film-details__control-button--favorite').addEventListener('click', this.#favoriteClickHandler);
   };
 
-  toggleWatchlistClass = () => this.element.querySelector('.film-details__control-button--watchlist').classList.toggle('film-details__control-button--active');
-
-  toggleWatchedClass = () => this.element.querySelector('.film-details__control-button--watched').classList.toggle('film-details__control-button--active');
-
-  toggleFavoriteClass = () => this.element.querySelector('.film-details__control-button--favorite').classList.toggle('film-details__control-button--active');
-
   #closeBtnClickHandler = (evt) => {
     evt.preventDefault();
 
+    document.body.classList.remove('hide-overflow');
     this._callback.closeBtnClick();
   };
 
   #escKeydownHandler = (evt) => {
-    evt.preventDefault();
-
     if (evt.key === 'Escape' || evt.key === 'Esc') {
+      evt.preventDefault();
+
+      document.body.classList.remove('hide-overflow');
       this._callback.escKeydown();
     }
   };
