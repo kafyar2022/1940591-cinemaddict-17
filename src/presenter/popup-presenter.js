@@ -95,16 +95,20 @@ export default class PopupPresenter {
   };
 
   #handleFilmModelEvent = (_, data) => {
-    const scrollPosition = this.#popupComponent.element.scrollTop;
-    this.destroy();
-    this.init(data);
-    this.#popupComponent.element.scroll(0, scrollPosition);
+    if (this.#popupComponent !== null) {
+      const scrollPosition = this.#popupComponent.element.scrollTop;
+      this.destroy();
+      this.init(data);
+      this.#popupComponent.element.scroll(0, scrollPosition);
+    }
   };
 
   #handleCommentsModelEvent = (_, data) => {
-    this.#film.comments.push(data.id);
+    if (this.#popupComponent !== null) {
+      this.#film.comments.push(data.id);
 
-    this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.PATCH, this.#film);
+      this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.PATCH, this.#film);
+    }
   };
 
   #renderComments = () => {

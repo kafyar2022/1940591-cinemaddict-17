@@ -1,7 +1,6 @@
+import { FILMS_COUNT } from '../const.js';
 import Observable from '../framework/observable.js';
 import { generateFilm } from '../mock/film.js';
-
-const FILMS_COUNT = 17;
 
 export default class FilmsModel extends Observable {
   #films = Array.from({ length: FILMS_COUNT }, generateFilm);
