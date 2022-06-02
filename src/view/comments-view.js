@@ -1,16 +1,14 @@
 import dayjs from 'dayjs';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 
-const createCommentTemplate = (comment) => `
+const createCommentTemplate = ({ author, comment, date, emotion }) => `
   <li class="film-details__comment">
-    <span class="film-details__comment-emoji">
-      <img src="./images/emoji/${comment.emotion}.png" width="55" height="55" alt="emoji-${comment.emotion}">
-    </span>
+      ${emotion ? `<span class="film-details__comment-emoji"><img src="./images/emoji/${emotion}.png" width="55" height="55" alt="emoji-${emotion}"></span>` : '<span class="film-details__comment-emoji film-details__comment-emoji--empty"></span>'}
     <div>
-      <p class="film-details__comment-text">${comment.comment}</p>
+      <p class="film-details__comment-text">${comment ?? ''}</p>
       <p class="film-details__comment-info">
-        <span class="film-details__comment-author">${comment.author}</span>
-        <span class="film-details__comment-day">${dayjs(comment.date).format('YYYY/MM/DD HH:mm')}</span>
+        <span class="film-details__comment-author">${author ?? ''}</span>
+        <span class="film-details__comment-day">${dayjs(date).format('YYYY/MM/DD HH:mm')}</span>
         <button class="film-details__comment-delete">Delete</button>
       </p>
     </div>
@@ -30,7 +28,7 @@ const createCommentsTemplate = ({ comments, newComment }) => `
     </ul>
 
     <div class="film-details__new-comment">
-      <div class="film-details__add-emoji-label">${newComment.emoji ? createEmojiTemplate(newComment.emoji) : ''}</div>
+      <div class="film-details__add-emoji-label">${newComment.emotion ? createEmojiTemplate(newComment.emotion) : ''}</div>
 
       <label class="film-details__comment-label">
         <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${newComment.text ?? ''}</textarea>
@@ -73,16 +71,30 @@ export default class CommentsView extends AbstractStatefulView {
     return createCommentsTemplate(this._state);
   }
 
+  setFormSubmitHandler = (cb) => {
+    this._callback.formSubmit = cb;
+
+    this.element.querySelector('.film-details__comment-input')
+      .addEventListener('keydown', this.#formSubmitHandler);
+  };
+
   static parseCommentsToState = (comments) => ({
     'comments': [...comments],
-    newComment: {
-      emoji: null,
+    'newComment': {
+      emotion: null,
       text: null,
     },
   });
 
   _restoreHandlers = () => {
     this.#setInnerHandlers();
+    this.setFormSubmitHandler(this._callback.formSubmit);
+  };
+
+  #formSubmitHandler = (evt) => {
+    if (evt.ctrlKey && evt.keyCode === 13) {
+      this._callback.formSubmit(this._state.newComment);
+    }
   };
 
   #setInnerHandlers = () => {
@@ -95,7 +107,7 @@ export default class CommentsView extends AbstractStatefulView {
   #emojiClickHandler = (evt) => {
     if (evt.target.tagName === 'INPUT') {
       this.updateElement({
-        newComment: { ...this._state.newComment, emoji: evt.target.value },
+        'newComment': { ...this._state.newComment, emotion: evt.target.value },
       });
     }
   };

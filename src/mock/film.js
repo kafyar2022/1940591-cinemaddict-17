@@ -43,7 +43,7 @@ const films = [
   },
 ];
 
-const generateCommentId = generateRandomId(1, 100000);
+const generateCommentId = generateRandomId(1, 1000);
 const generateCommentIds = () => Array.from({ length: getRandomInteger(0, 10) }, generateCommentId);
 
 export const generateFilm = (_, i) => {
