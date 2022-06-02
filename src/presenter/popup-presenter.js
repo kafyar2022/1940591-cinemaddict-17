@@ -79,6 +79,16 @@ export default class PopupPresenter {
         this.#commentsModel.addComment(updateType, update);
         break;
 
+      case UserAction.DELETE_COMMENT:
+        this.#film = {
+          ...this.#film,
+          comments: this.#film.comments.filter((comment) => comment !== Number(update)),
+        };
+
+        this.#filmsModel.updateFilm(updateType, this.#film);
+        this.#commentsModel.deleteComment(update);
+        break;
+
       default:
         throw new Error('Undefined user action');
     }

@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 
-const createCommentTemplate = ({ author, comment, date, emotion }) => `
+const createCommentTemplate = ({ id, author, comment, date, emotion }) => `
   <li class="film-details__comment">
       ${emotion ? `<span class="film-details__comment-emoji"><img src="./images/emoji/${emotion}.png" width="55" height="55" alt="emoji-${emotion}"></span>` : '<span class="film-details__comment-emoji film-details__comment-emoji--empty"></span>'}
     <div>
@@ -9,7 +9,7 @@ const createCommentTemplate = ({ author, comment, date, emotion }) => `
       <p class="film-details__comment-info">
         <span class="film-details__comment-author">${author ?? ''}</span>
         <span class="film-details__comment-day">${dayjs(date).format('YYYY/MM/DD HH:mm')}</span>
-        <button class="film-details__comment-delete">Delete</button>
+        <button class="film-details__comment-delete" data-id="${id}">Delete</button>
       </p>
     </div>
   </li>
@@ -78,6 +78,12 @@ export default class CommentsView extends AbstractStatefulView {
       .addEventListener('keydown', this.#formSubmitHandler);
   };
 
+  setDeleteBtnClickHandler = (cb) => {
+    this._callback.deleteComment = cb;
+
+    this.element.addEventListener('click', this.#deleteBtnClickHandler);
+  };
+
   static parseCommentsToState = (comments) => ({
     'comments': [...comments],
     'newComment': {
@@ -89,6 +95,7 @@ export default class CommentsView extends AbstractStatefulView {
   _restoreHandlers = () => {
     this.#setInnerHandlers();
     this.setFormSubmitHandler(this._callback.formSubmit);
+    this.setDeleteBtnClickHandler(this._callback.deleteComment);
   };
 
   #formSubmitHandler = (evt) => {
@@ -113,4 +120,12 @@ export default class CommentsView extends AbstractStatefulView {
   };
 
   #textInputHandler = (evt) => (this._state.newComment.text = evt.target.value);
+
+  #deleteBtnClickHandler = (evt) => {
+    if (evt.target.className === 'film-details__comment-delete') {
+      evt.preventDefault();
+
+      this._callback.deleteComment(evt.target.dataset.id);
+    }
+  };
 }

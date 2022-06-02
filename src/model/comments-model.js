@@ -28,4 +28,8 @@ export default class CommentsModel extends Observable {
 
     this._notify(updateType, update);
   };
+
+  deleteComment = (id) => {
+    this.#comments = this.#comments.filter((comment) => comment.id !== id);
+  };
 }

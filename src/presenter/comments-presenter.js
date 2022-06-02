@@ -16,6 +16,7 @@ export default class CommentsPresenter {
   init(comments) {
     this.#commentsComponent = new CommentsView(comments);
     this.#commentsComponent.setFormSubmitHandler(this.#handleFormSubmit);
+    this.#commentsComponent.setDeleteBtnClickHandler(this.#handleDeleteBtnClick);
 
     render(this.#commentsComponent, this.#commentsContainer);
   }
@@ -24,5 +25,9 @@ export default class CommentsPresenter {
     if (comment.text !== null || comment.emotion !== null) {
       this.#changeData(UserAction.ADD_COMMENT, UpdateType.PATCH, comment);
     }
+  };
+
+  #handleDeleteBtnClick = (id) => {
+    this.#changeData(UserAction.DELETE_COMMENT, UpdateType.PATCH, id);
   };
 }
