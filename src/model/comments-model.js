@@ -13,7 +13,7 @@ export default class CommentsModel extends Observable {
   pickComments = (commentIds) => this.#comments.filter((comment) => commentIds.includes(comment.id));
 
   addComment = (updateType, update) => {
-    update = {
+    const newComments = {
       id: nanoid(),
       author: 'Some Author',
       comment: update.text,
@@ -23,13 +23,11 @@ export default class CommentsModel extends Observable {
 
     this.#comments = [
       ...this.#comments,
-      update,
+      newComments,
     ];
 
-    this._notify(updateType, update);
+    this._notify(updateType, newComments);
   };
 
-  deleteComment = (id) => {
-    this.#comments = this.#comments.filter((comment) => comment.id !== id);
-  };
+  deleteComment = (id) => (this.#comments = this.#comments.filter((comment) => comment.id !== id));
 }

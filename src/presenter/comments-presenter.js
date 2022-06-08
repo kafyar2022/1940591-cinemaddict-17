@@ -22,7 +22,7 @@ export default class CommentsPresenter {
   }
 
   #handleFormSubmit = (comment) => {
-    if (comment.text !== null || comment.emotion !== null) {
+    if (comment.text) {
       this.#changeData(UserAction.ADD_COMMENT, UpdateType.PATCH, comment);
     }
   };
