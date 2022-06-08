@@ -33,6 +33,13 @@ const NoFilmsTextType = {
   [FilterType.FAVORITES]: 'There are no favorite movies now',
 };
 
+const Method = {
+  GET: 'GET',
+  PUT: 'PUT',
+  POST: 'POST',
+  DELETE: 'DELETE',
+};
+
 export {
   FILMS_COUNT,
   FILM_COUNT_PER_STEP,
@@ -41,4 +48,5 @@ export {
   UpdateType,
   UserAction,
   NoFilmsTextType,
+  Method,
 };
