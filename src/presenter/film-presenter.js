@@ -42,7 +42,9 @@ export default class FilmPresenter {
   };
 
   #handleFilmClick = () => {
-    this.#popupPresenter.init(this.#film);
+    if (this.#popupPresenter.film !== this.#film) {
+      this.#popupPresenter.init(this.#film);
+    }
   };
 
   #handleWatchlistClick = () => {

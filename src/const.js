@@ -1,5 +1,7 @@
 const FILMS_COUNT = 18;
 const FILM_COUNT_PER_STEP = 5;
+const AUTHORIZATION = 'Basic dsfjhskdfjsldf';
+const END_POINT = 'https://17.ecmascript.pages.academy/cinemaddict';
 
 const FilterType = {
   ALL: 'all',
@@ -18,6 +20,7 @@ const UpdateType = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
+  INIT: 'INIT',
 };
 
 const UserAction = {
@@ -40,6 +43,11 @@ const Method = {
   DELETE: 'DELETE',
 };
 
+const UiBlockTimeLimit = {
+  LOWER_LIMIT: 350,
+  UPPER_LIMIT: 1000,
+};
+
 export {
   FILMS_COUNT,
   FILM_COUNT_PER_STEP,
@@ -49,4 +57,7 @@ export {
   UserAction,
   NoFilmsTextType,
   Method,
+  AUTHORIZATION,
+  END_POINT,
+  UiBlockTimeLimit,
 };

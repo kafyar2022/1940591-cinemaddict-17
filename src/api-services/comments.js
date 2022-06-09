@@ -4,8 +4,8 @@ import ApiService from '../framework/api-service.js';
 export default class CommentsApiService extends ApiService {
   #id = null;
 
-  constructor(filmId) {
-    super();
+  constructor(endPoint, authorization, filmId) {
+    super(endPoint, authorization);
     this.#id = filmId;
   }
 
