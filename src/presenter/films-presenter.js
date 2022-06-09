@@ -4,10 +4,12 @@ import FilmListView from '../view/film-list-view.js';
 import LoadMoreBtnView from '../view/load-more-btn-view.js';
 import SortView from '../view/sort-view.js';
 import NoFilmsView from '../view/no-films-view.js';
+import LoadingView from '../view/loading-view.js';
 import FilmPresenter from './film-presenter.js';
-import { FILM_COUNT_PER_STEP, SortType, UpdateType, UserAction } from '../const.js';
+import { FILM_COUNT_PER_STEP, SortType, UiBlockTimeLimit, UpdateType, UserAction } from '../const.js';
 import { sortByDate, sortByRating } from '../utils/film.js';
 import { filter } from '../utils/filter.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 
 export default class FilmsPresenter {
   #renderedFilmsCount = FILM_COUNT_PER_STEP;
@@ -16,13 +18,16 @@ export default class FilmsPresenter {
   #filmsModel = null;
   #filterModel = null;
   #filterType = null;
+  #isLoading = true;
 
   #sortComponent = null;
   #filmsWrapComponent = null;
   #filmListComponent = null;
   #loadMoreBtnComponent = null;
   #noFilmsComponent = null;
+  #loadingComponent = new LoadingView();
   #popupPresenter = null;
+  #uiBlocker = new UiBlocker(UiBlockTimeLimit.LOWER_LIMIT, UiBlockTimeLimit.UPPER_LIMIT);
 
   #filmPresenters = new Map();
 
@@ -56,6 +61,11 @@ export default class FilmsPresenter {
   };
 
   #renderFilmsBoard = () => {
+    if (this.#isLoading) {
+      render(this.#loadingComponent, this.#filmsContainer);
+      return;
+    }
+
     if (!this.films.length) {
       this.#renderNoFilms();
       return;
@@ -164,15 +174,19 @@ export default class FilmsPresenter {
     this.#filmPresenters.set(film.id, filmPresenter);
   };
 
-  #handleViewAction = (actionType, updateType, update) => {
+  #handleViewAction = async (actionType, updateType, update) => {
+    this.#uiBlocker.block();
+
     switch (actionType) {
       case UserAction.UPDATE_FILM:
-        this.#filmsModel.updateFilm(updateType, update);
+        await this.#filmsModel.updateFilm(updateType, update);
         break;
 
       default:
         throw new Error('Undefined user action');
     }
+
+    this.#uiBlocker.unblock();
   };
 
   #handleModelEvent = (updateType, data) => {
@@ -186,6 +200,11 @@ export default class FilmsPresenter {
         break;
       case UpdateType.MAJOR:
         this.#clearFilmsBoard({ resetRenderedTaskCount: true, resetSortType: true });
+        this.#renderFilmsBoard();
+        break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
         this.#renderFilmsBoard();
         break;
       default:
