@@ -1,21 +1,23 @@
-import { UpdateType, UserAction, END_POINT, AUTHORIZATION, UiBlockTimeLimit } from '../const.js';
+import { UpdateType, UserAction, PopupMode } from '../const.js';
 import { remove, render } from '../framework/render.js';
 import PopupView from '../view/popup-view.js';
 import CommentsPresenter from './comments-presenter.js';
-import CommentsModel from '../model/comments-model.js';
-import CommentsApiService from '../api-services/comments.js';
-import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
+import PopupControlsView from '../view/popup-controls-view.js';
 
 export default class PopupPresenter {
-  #film = {};
-  #popupComponent = null;
-
   #filmsModel = null;
   #commentsModel = null;
-  #uiBlocker = new UiBlocker(UiBlockTimeLimit.LOWER_LIMIT, UiBlockTimeLimit.UPPER_LIMIT);
+  #uiBlocker = null;
 
-  constructor(filmsModel) {
+  #film = {};
+  #popupComponent = null;
+  #popupControlsComponent = null;
+  #mode = PopupMode.CLOSED;
+
+  constructor(filmsModel, commentsModel, uiBlocker) {
     this.#filmsModel = filmsModel;
+    this.#commentsModel = commentsModel;
+    this.#uiBlocker = uiBlocker;
 
     this.#filmsModel.addObserver(this.#handleModelEvent);
   }
@@ -26,8 +28,8 @@ export default class PopupPresenter {
 
   init = (film) => {
     this.#film = film;
-    this.#commentsModel = new CommentsModel(new CommentsApiService(END_POINT, AUTHORIZATION, this.film.id));
-    this.#commentsModel.init();
+    this.#commentsModel.init(this.#film.id);
+    this.#mode = PopupMode.OPENED;
 
 
     if (this.#popupComponent !== null) {
@@ -38,10 +40,8 @@ export default class PopupPresenter {
 
     this.#popupComponent.setCloseBtnClickHandler(() => this.destroy());
     this.#popupComponent.setEscKeydownHandler(() => this.destroy());
-    this.#popupComponent.setWatchlistClickHandler(this.#handleWatchlistClick);
-    this.#popupComponent.setWatchedClickHandler(this.#handleWatchedClick);
-    this.#popupComponent.setFavoriteClickHandler(this.#handleFavoriteClick);
 
+    this.#renderPopupControls();
     this.#renderComments();
 
     document.body.classList.add('hide-overflow');
@@ -53,28 +53,35 @@ export default class PopupPresenter {
   destroy() {
     if (this.#popupComponent !== null) {
       remove(this.#popupComponent);
-    }
-    if (this.#film !== null) {
-      this.#film = null;
+      this.#mode = PopupMode.CLOSED;
+      this.#film = {};
     }
   }
+
+  #renderPopupControls = () => {
+    this.#popupControlsComponent = new PopupControlsView(this.#film.userDetails);
+    this.#popupControlsComponent.setWatchlistClickHandler(this.#handleWatchlistClick);
+    this.#popupControlsComponent.setWatchedClickHandler(this.#handleWatchedClick);
+    this.#popupControlsComponent.setFavoriteClickHandler(this.#handleFavoriteClick);
+    render(this.#popupControlsComponent, this.#popupComponent.controlsContainer);
+  };
 
   #handleWatchlistClick = () => {
     this.#film.userDetails.watchlist = !this.#film.userDetails.watchlist;
 
-    this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.PATCH, this.#film);
+    this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
   };
 
   #handleWatchedClick = () => {
     this.#film.userDetails.alreadyWatched = !this.#film.userDetails.alreadyWatched;
 
-    this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.PATCH, this.#film);
+    this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
   };
 
   #handleFavoriteClick = () => {
     this.#film.userDetails.favorite = !this.#film.userDetails.favorite;
 
-    this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.PATCH, this.#film);
+    this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
   };
 
   #handleViewAction = async (actionType, updateType, update) => {
@@ -95,11 +102,13 @@ export default class PopupPresenter {
   #handleModelEvent = (updateType, data) => {
     if (this.#popupComponent !== null) {
       const scrollPosition = this.#popupComponent.element.scrollTop;
-
       switch (updateType) {
-        case UpdateType.PATCH:
-          this.destroy();
-          this.init(data);
+        case UpdateType.MINOR:
+          if (this.#mode === 'opened') {
+            this.#film = data;
+            remove(this.#popupControlsComponent);
+            this.#renderPopupControls();
+          }
           break;
       }
 
@@ -109,7 +118,7 @@ export default class PopupPresenter {
 
   #renderComments = () => {
     const comments = this.#commentsModel.comments;
-    const commentsPresenter = new CommentsPresenter(this.#popupComponent.commentsContainer, this.#commentsModel);
+    const commentsPresenter = new CommentsPresenter(this.#popupComponent.commentsContainer, this.#commentsModel, this.#film, this.#uiBlocker);
     commentsPresenter.init(comments);
   };
 }

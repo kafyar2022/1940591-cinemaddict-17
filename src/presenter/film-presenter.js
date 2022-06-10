@@ -3,11 +3,11 @@ import { remove, render, replace } from '../framework/render.js';
 import FilmView from '../view/film-view.js';
 
 export default class FilmPresenter {
-  #film = {};
   #filmContainer = null;
+  #popupPresenter = null;
   #changeData = null;
 
-  #popupPresenter = null;
+  #film = {};
   #filmComponent = null;
 
   constructor(filmContainer, popupPresenter, changeData) {
@@ -22,7 +22,6 @@ export default class FilmPresenter {
     const prevFilmComponent = this.#filmComponent;
 
     this.#filmComponent = new FilmView(this.#film);
-
     this.#filmComponent.setFilmClickHandler(this.#handleFilmClick);
     this.#filmComponent.setWatchlistClickHandler(this.#handleWatchlistClick);
     this.#filmComponent.setWatchedClickHandler(this.#handleWatchedClick);

@@ -6,14 +6,18 @@ import CommentsLoadingView from '../view/comments-loading-view.js';
 export default class CommentsPresenter {
   #commentsContainer = null;
   #commentsModel = null;
+  #film = {};
+  #uiBlocker = null;
+
   #isLoading = true;
   #loadingComponent = new CommentsLoadingView();
-
   #commentsComponent = null;
 
-  constructor(commentsContainer, commentsModel) {
+  constructor(commentsContainer, commentsModel, film, uiBlocker) {
     this.#commentsContainer = commentsContainer;
     this.#commentsModel = commentsModel;
+    this.#film = film;
+    this.#uiBlocker = uiBlocker;
 
     this.#commentsModel.addObserver(this.#handleModelEvent);
   }
@@ -24,6 +28,10 @@ export default class CommentsPresenter {
       return;
     }
 
+    if (this.#commentsComponent) {
+      remove(this.#commentsComponent);
+    }
+
     this.#commentsComponent = new CommentsView(comments);
     this.#commentsComponent.setFormSubmitHandler(this.#handleFormSubmit);
     this.#commentsComponent.setDeleteBtnClickHandler(this.#handleDeleteBtnClick);
@@ -31,20 +39,26 @@ export default class CommentsPresenter {
     render(this.#commentsComponent, this.#commentsContainer);
   };
 
-  #handleFormSubmit = (comment) => {
-    if (comment.text) {
-      this.#handleViewAction(UserAction.ADD_COMMENT, UpdateType.PATCH, comment);
+  #handleFormSubmit = (newComment) => {
+    if (newComment.comment && newComment.emotion) {
+      this.#handleViewAction(UserAction.ADD_COMMENT, UpdateType.PATCH, { film: this.#film, comment: newComment });
     }
   };
 
   #handleDeleteBtnClick = (commentId) => {
-    const update = this.#commentsModel.comments.find((comment) => comment.id === commentId);
-    this.#handleViewAction(UserAction.DELETE_COMMENT, UpdateType.PATCH, update);
+    this.#handleViewAction(UserAction.DELETE_COMMENT, UpdateType.PATCH, { film: this.#film, commentId });
   };
 
   #handleViewAction = async (userAction, updateType, update) => {
-    // eslint-disable-next-line no-console
-    console.log(userAction, updateType, update);
+    this.#uiBlocker.block();
+
+    switch (userAction) {
+      case UserAction.ADD_COMMENT:
+        await this.#commentsModel.addCommentByFilmId(updateType, update);
+        break;
+    }
+
+    this.#uiBlocker.unblock();
   };
 
   #handleModelEvent = (updateType, data) => {
@@ -53,6 +67,9 @@ export default class CommentsPresenter {
         this.#isLoading = false;
         remove(this.#loadingComponent);
         this.init(data);
+        break;
+      case UpdateType.PATCH:
+        this.init(data.comments);
         break;
     }
   };
