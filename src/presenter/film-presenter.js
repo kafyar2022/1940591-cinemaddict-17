@@ -18,7 +18,6 @@ export default class FilmPresenter {
 
   init(film) {
     this.#film = film;
-
     const prevFilmComponent = this.#filmComponent;
 
     this.#filmComponent = new FilmView(this.#film);
@@ -40,27 +39,29 @@ export default class FilmPresenter {
     remove(this.#filmComponent);
   };
 
+  setAborting = () => {
+    this.#filmComponent.shake();
+  };
+
   #handleFilmClick = () => {
     if (this.#popupPresenter.film !== this.#film) {
+      this.#popupPresenter.isLoading = true;
       this.#popupPresenter.init(this.#film);
     }
   };
 
   #handleWatchlistClick = () => {
     this.#film.userDetails.watchlist = !this.#film.userDetails.watchlist;
-
     this.#changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
   };
 
   #handleWatchedClick = () => {
     this.#film.userDetails.alreadyWatched = !this.#film.userDetails.alreadyWatched;
-
     this.#changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
   };
 
   #handleFavoriteClick = () => {
     this.#film.userDetails.favorite = !this.#film.userDetails.favorite;
-
     this.#changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
   };
 }

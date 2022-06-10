@@ -7,7 +7,7 @@ export default class CommentsApiService extends ApiService {
   })
     .then(ApiService.parseResponse);
 
-  addCommentByFilmId = async ({film, comment}) => this._load({
+  addComment = async ({film, comment}) => this._load({
     url: `comments/${film.id}`,
     method: Method.POST,
     body: JSON.stringify(comment),

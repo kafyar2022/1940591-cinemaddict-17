@@ -93,7 +93,7 @@ export default class PopupView extends AbstractView {
     return this.element.querySelector('.film-details__bottom-container');
   }
 
-  get controlsContainer() {
+  get detailsContainer() {
     return this.element.querySelector('.film-details__top-container');
   }
 

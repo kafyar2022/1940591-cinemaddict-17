@@ -6,9 +6,11 @@ import SortView from '../view/sort-view.js';
 import NoFilmsView from '../view/no-films-view.js';
 import LoadingView from '../view/loading-view.js';
 import FilmPresenter from './film-presenter.js';
-import { FILM_COUNT_PER_STEP, SortType, UpdateType, UserAction } from '../const.js';
+import { FILM_COUNT_PER_STEP, PopupMode, SortType, UiBlockTimeLimit, UpdateType, UserAction } from '../const.js';
 import { sortByDate, sortByRating } from '../utils/film.js';
 import { filter } from '../utils/filter.js';
+import PopupPresenter from './popup-presenter.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 
 export default class FilmsPresenter {
   #filmsContainer = null;
@@ -16,33 +18,32 @@ export default class FilmsPresenter {
   #commentsModel = null;
   #filterModel = null;
   #filterType = null;
-  #popupPresenter = null;
-  #uiBlocker = null;
 
   #renderedFilmsCount = FILM_COUNT_PER_STEP;
   #currentSortType = SortType.DEFAULT;
   #isLoading = true;
 
   #sortComponent = null;
+  #noFilmsComponent = null;
+  #popupPresenter = null;
   #filmsWrapComponent = new FilmsWrapView();
   #filmListComponent = new FilmListView();
   #loadMoreBtnComponent = new LoadMoreBtnView();
   #loadingComponent = new LoadingView();
-  #noFilmsComponent = null;
 
   #filmPresenters = new Map();
+  #uiBlocker = new UiBlocker(UiBlockTimeLimit.LOWER_LIMIT, UiBlockTimeLimit.UPPER_LIMIT);
 
-  constructor(filmsContainer, filmsModel, commentsModel, filterModel, popupPresenter, uiBlocker) {
+  constructor(filmsContainer, filmsModel, commentsModel, filterModel) {
     this.#filmsContainer = filmsContainer;
     this.#filmsModel = filmsModel;
     this.#commentsModel = commentsModel;
     this.#filterModel = filterModel;
-    this.#popupPresenter = popupPresenter;
-    this.#uiBlocker = uiBlocker;
+    this.#popupPresenter = new PopupPresenter(this.#commentsModel, this.#handleViewAction);
 
     this.#filmsModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
-    this.#commentsModel.addObserver(this.#handleCommentsModelEvent);
+    this.#commentsModel.addObserver(this.#handleModelEvent);
   }
 
   get films() {
@@ -56,7 +57,6 @@ export default class FilmsPresenter {
       case SortType.RATING:
         return filteredFilms.sort(sortByRating);
     }
-
     return filteredFilms;
   }
 
@@ -65,17 +65,13 @@ export default class FilmsPresenter {
       render(this.#loadingComponent, this.#filmsContainer);
       return;
     }
-
     if (!this.films.length) {
       this.#renderNoFilms();
       return;
     }
-
     this.#renderSort();
-
     render(this.#filmsWrapComponent, this.#filmsContainer);
     render(this.#filmListComponent, this.#filmsWrapComponent.element);
-
     this.#renderFilms();
   };
 
@@ -94,7 +90,6 @@ export default class FilmsPresenter {
     if (this.#currentSortType === sortType) {
       return;
     }
-
     this.#currentSortType = sortType;
     this.#clearFilmsBoard();
     this.init();
@@ -120,34 +115,25 @@ export default class FilmsPresenter {
   };
 
   #renderFilms = () => {
-    const films = this.films;
-    const filmsCount = films.length;
-
-    for (let i = 0; i < Math.min(filmsCount, this.#renderedFilmsCount); i++) {
+    for (let i = 0; i < Math.min(this.films.length, this.#renderedFilmsCount); i++) {
       this.#renderFilm(this.films[i]);
     }
-
-    if (filmsCount > this.#renderedFilmsCount) {
+    if (this.films.length > this.#renderedFilmsCount) {
       this.#renderLoadMoreBtn();
     }
   };
 
   #renderLoadMoreBtn = () => {
     this.#loadMoreBtnComponent.setClickHandler(this.#handleLoadMoreBtnClick);
-
     render(this.#loadMoreBtnComponent, this.#filmListComponent.element);
   };
 
   #handleLoadMoreBtnClick = () => {
-    const films = this.films;
-    const filmsCount = films.length;
-
-    for (let i = this.#renderedFilmsCount; i < Math.min(filmsCount, this.#renderedFilmsCount + FILM_COUNT_PER_STEP); i++) {
-      this.#renderFilm(films[i]);
+    for (let i = this.#renderedFilmsCount; i < Math.min(this.films.length, this.#renderedFilmsCount + FILM_COUNT_PER_STEP); i++) {
+      this.#renderFilm(this.films[i]);
     }
     this.#renderedFilmsCount += FILM_COUNT_PER_STEP;
-
-    if (this.#renderedFilmsCount >= filmsCount) {
+    if (this.#renderedFilmsCount >= this.films.length) {
       remove(this.#loadMoreBtnComponent);
     }
   };
@@ -159,48 +145,72 @@ export default class FilmsPresenter {
   };
 
   #handleViewAction = async (actionType, updateType, update) => {
-    this.#uiBlocker.block();
-
     switch (actionType) {
       case UserAction.UPDATE_FILM:
-        await this.#filmsModel.updateFilm(updateType, update);
+        this.#uiBlocker.block();
+        try {
+          await this.#filmsModel.updateFilm(updateType, update);
+        } catch (error) {
+          this.#filmPresenters.get(update.id).setAborting();
+          this.#popupPresenter.setFilmAborting();
+        }
         break;
-
+      case UserAction.ADD_COMMENT:
+        this.#uiBlocker.block();
+        this.#popupPresenter.setSaving();
+        try {
+          await this.#commentsModel.addComment(updateType, update);
+        } catch (error) {
+          this.#popupPresenter.setAborting();
+        }
+        break;
+      case UserAction.DELETE_COMMENT:
+        this.#popupPresenter.setDeleting();
+        try {
+          await this.#commentsModel.deleteComment(updateType, update);
+        } catch (error) {
+          this.#popupPresenter.setAborting();
+        }
+        break;
       default:
         throw new Error('Undefined user action');
     }
-
     this.#uiBlocker.unblock();
   };
 
   #handleModelEvent = (updateType, data) => {
     switch (updateType) {
       case UpdateType.PATCH:
-        this.#filmPresenters.get(data.id).init(data);
+        if (data) {
+          this.#filmPresenters.get(data.movie.id).init(data.movie);
+          this.#popupPresenter.resetComments(data.comments);
+        }
+        this.#popupPresenter.resetComments(this.#commentsModel.comments);
         break;
       case UpdateType.MINOR:
         this.#clearFilmsBoard();
         this.init();
+        if (this.#popupPresenter.mode === PopupMode.OPENED) {
+          this.#popupPresenter.resetDetails(data.userDetails);
+        }
         break;
       case UpdateType.MAJOR:
         this.#clearFilmsBoard({ resetRenderedTaskCount: true, resetSortType: true });
         this.init();
         break;
       case UpdateType.INIT:
-        this.#isLoading = false;
-        remove(this.#loadingComponent);
-        this.init();
+        if (this.#isLoading) {
+          this.#isLoading = false;
+          remove(this.#loadingComponent);
+          this.init();
+        }
+        if (this.#popupPresenter.mode === PopupMode.OPENED) {
+          this.#popupPresenter.isLoading = false;
+          this.#popupPresenter.initComments(data);
+        }
         break;
       default:
         throw new Error('Undefined user action');
-    }
-  };
-
-  #handleCommentsModelEvent = (updateType, data) => {
-    switch (updateType) {
-      case UpdateType.PATCH:
-        this.#filmPresenters.get(data.movie.id).init(data.movie);
-        break;
     }
   };
 }

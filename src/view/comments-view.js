@@ -63,7 +63,6 @@ const createCommentsTemplate = ({ comments, newComment }) => `
 export default class CommentsView extends AbstractStatefulView {
   constructor(comments) {
     super();
-
     this._state = CommentsView.parseCommentsToState(comments);
     this.#setInnerHandlers();
   }
@@ -126,7 +125,7 @@ export default class CommentsView extends AbstractStatefulView {
     if (evt.target.className === 'film-details__comment-delete') {
       evt.preventDefault();
 
-      this._callback.deleteComment(evt.target.dataset.id);
+      this._callback.deleteComment(evt);
     }
   };
 }

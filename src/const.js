@@ -48,6 +48,7 @@ const UiBlockTimeLimit = {
 };
 
 const PopupMode = {
+  DEFAULT: 'closed',
   OPENED: 'opened',
   CLOSED: 'closed',
 };

@@ -10,6 +10,8 @@ export default class CommentsPresenter {
   #uiBlocker = null;
 
   #isLoading = true;
+  #isDisabled = false;
+  #isDeleting = false;
   #loadingComponent = new CommentsLoadingView();
   #commentsComponent = null;
 
@@ -39,26 +41,33 @@ export default class CommentsPresenter {
     render(this.#commentsComponent, this.#commentsContainer);
   };
 
+
+  #handleDeleteBtnClick = (evt) => {
+    if (this.#isDeleting) {
+      return;
+    }
+    evt.target.textContent = 'Deleting...';
+    this.#handleViewAction(UserAction.DELETE_COMMENT, UpdateType.PATCH, evt.target.dataset.id);
+  };
+
   #handleFormSubmit = (newComment) => {
-    if (newComment.comment && newComment.emotion) {
+    if (!this.#isDisabled && newComment.comment && newComment.emotion) {
       this.#handleViewAction(UserAction.ADD_COMMENT, UpdateType.PATCH, { film: this.#film, comment: newComment });
     }
   };
 
-  #handleDeleteBtnClick = (commentId) => {
-    this.#handleViewAction(UserAction.DELETE_COMMENT, UpdateType.PATCH, { film: this.#film, commentId });
-  };
-
   #handleViewAction = async (userAction, updateType, update) => {
-    this.#uiBlocker.block();
-
+    this.#isDisabled = true;
     switch (userAction) {
       case UserAction.ADD_COMMENT:
         await this.#commentsModel.addCommentByFilmId(updateType, update);
         break;
+      case UserAction.DELETE_COMMENT:
+        await this.#commentsModel.deleteCommentById(updateType, update);
+        break;
     }
-
     this.#uiBlocker.unblock();
+
   };
 
   #handleModelEvent = (updateType, data) => {
@@ -69,7 +78,7 @@ export default class CommentsPresenter {
         this.init(data);
         break;
       case UpdateType.PATCH:
-        this.init(data.comments);
+        this.init(this.#commentsModel.comments);
         break;
     }
   };
