@@ -32,7 +32,7 @@ const createCommentsTemplate = ({ comments, newComment }) => `
       <div class="film-details__add-emoji-label">${newComment.emotion ? createEmojiTemplate(newComment.emotion) : ''}</div>
 
       <label class="film-details__comment-label">
-        <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${newComment.text ?? ''}</textarea>
+        <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${newComment.comment ?? ''}</textarea>
       </label>
 
       <div class="film-details__emoji-list">
@@ -63,7 +63,6 @@ const createCommentsTemplate = ({ comments, newComment }) => `
 export default class CommentsView extends AbstractStatefulView {
   constructor(comments) {
     super();
-
     this._state = CommentsView.parseCommentsToState(comments);
     this.#setInnerHandlers();
   }
@@ -88,8 +87,8 @@ export default class CommentsView extends AbstractStatefulView {
   static parseCommentsToState = (comments) => ({
     'comments': [...comments],
     'newComment': {
+      comment: null,
       emotion: null,
-      text: null,
     },
   });
 
@@ -120,13 +119,13 @@ export default class CommentsView extends AbstractStatefulView {
     }
   };
 
-  #textInputHandler = (evt) => (this._state.newComment.text = evt.target.value);
+  #textInputHandler = (evt) => (this._state.newComment.comment = evt.target.value);
 
   #deleteBtnClickHandler = (evt) => {
     if (evt.target.className === 'film-details__comment-delete') {
       evt.preventDefault();
 
-      this._callback.deleteComment(evt.target.dataset.id);
+      this._callback.deleteComment(evt);
     }
   };
 }

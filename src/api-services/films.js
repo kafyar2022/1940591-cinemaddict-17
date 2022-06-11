@@ -7,18 +7,13 @@ export default class FilmsApiService extends ApiService {
       .then(ApiService.parseResponse);
   }
 
-  updateFilm = async (film) => {
-    const response = await this._load({
-      url: `movies/${film.id}`,
-      method: Method.PUT,
-      body: JSON.stringify(this.#adaptToServer(film)),
-      headers: new Headers({ 'Content-type': 'application/json' }),
-    });
-
-    const parsedResponse = await ApiService.parseResponse(response);
-
-    return parsedResponse;
-  };
+  updateFilm = async (film) => this._load({
+    url: `movies/${film.id}`,
+    method: Method.PUT,
+    body: JSON.stringify(this.#adaptToServer(film)),
+    headers: new Headers({ 'Content-type': 'application/json' }),
+  })
+    .then(ApiService.parseResponse);
 
   #adaptToServer = (film) => {
     const adaptedFilm = {

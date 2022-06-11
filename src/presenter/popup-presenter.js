@@ -1,115 +1,177 @@
-import { UpdateType, UserAction, END_POINT, AUTHORIZATION, UiBlockTimeLimit } from '../const.js';
-import { remove, render } from '../framework/render.js';
+import { UpdateType, UserAction, PopupMode } from '../const.js';
+import { remove, render, replace } from '../framework/render.js';
 import PopupView from '../view/popup-view.js';
-import CommentsPresenter from './comments-presenter.js';
-import CommentsModel from '../model/comments-model.js';
-import CommentsApiService from '../api-services/comments.js';
-import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
+import DetailsView from '../view/details-view.js';
+import CommentsView from '../view/comments-view.js';
+import CommentsLoadingView from '../view/comments-loading-view.js';
 
 export default class PopupPresenter {
+  #commentsModel = null;
+  #changeData = null;
+
   #film = {};
   #popupComponent = null;
+  #detailsComponent = null;
+  #commentsComponent = null;
 
-  #filmsModel = null;
-  #commentsModel = null;
-  #uiBlocker = new UiBlocker(UiBlockTimeLimit.LOWER_LIMIT, UiBlockTimeLimit.UPPER_LIMIT);
+  #mode = PopupMode.DEFAULT;
+  #isLoading = true;
+  #isSaving = false;
+  #isDeleting = false;
+  #deleteBtn = null;
+  #loadingComponent = new CommentsLoadingView();
 
-  constructor(filmsModel) {
-    this.#filmsModel = filmsModel;
-
-    this.#filmsModel.addObserver(this.#handleModelEvent);
+  constructor(commentsModel, changeData) {
+    this.#commentsModel = commentsModel;
+    this.#changeData = changeData;
   }
 
   get film() {
     return this.#film;
   }
 
+  get mode() {
+    return this.#mode;
+  }
+
+  get isLoading() {
+    return this.#isLoading;
+  }
+
+  set isLoading(boolean) {
+    this.#isLoading = boolean;
+  }
+
   init = (film) => {
     this.#film = film;
-    this.#commentsModel = new CommentsModel(new CommentsApiService(END_POINT, AUTHORIZATION, this.film.id));
-    this.#commentsModel.init();
+    this.#commentsModel.init(this.film.id);
+    this.#mode = PopupMode.OPENED;
 
-
-    if (this.#popupComponent !== null) {
-      remove(this.#popupComponent);
-    }
-
-    this.#popupComponent = new PopupView(this.#film);
-
-    this.#popupComponent.setCloseBtnClickHandler(() => this.destroy());
-    this.#popupComponent.setEscKeydownHandler(() => this.destroy());
-    this.#popupComponent.setWatchlistClickHandler(this.#handleWatchlistClick);
-    this.#popupComponent.setWatchedClickHandler(this.#handleWatchedClick);
-    this.#popupComponent.setFavoriteClickHandler(this.#handleFavoriteClick);
-
+    this.#renderPopup();
+    this.#renderDetails();
     this.#renderComments();
 
     document.body.classList.add('hide-overflow');
     render(this.#popupComponent, document.body);
-
-    this.#commentsModel.addObserver(this.#handleModelEvent);
   };
 
-  destroy() {
+  destroy = () => {
+    if (this.#popupComponent !== null) {
+      remove(this.#popupComponent);
+      this.#mode = PopupMode.DEFAULT;
+      this.#film = {};
+    }
+  };
+
+  resetDetails = (details) => {
+    const prevDetailsComponent = this.#detailsComponent;
+    this.#detailsComponent = new DetailsView(details);
+    this.#detailsComponent.setWatchlistClickHandler(this.#handleWatchlistClick);
+    this.#detailsComponent.setWatchedClickHandler(this.#handleWatchedClick);
+    this.#detailsComponent.setFavoriteClickHandler(this.#handleFavoriteClick);
+
+    replace(this.#detailsComponent, prevDetailsComponent);
+    remove(prevDetailsComponent);
+  };
+
+  initComments = (comments) => {
+    this.#commentsComponent = new CommentsView(comments);
+    this.#commentsComponent.setFormSubmitHandler(this.#handleFormSubmit);
+    this.#commentsComponent.setDeleteBtnClickHandler(this.#handleDeleteBtnClick);
+
+    replace(this.#commentsComponent, this.#loadingComponent);
+    remove(this.#loadingComponent);
+  };
+
+  resetComments = (comments) => {
+    this.#isSaving = false;
+    this.#isDeleting = false;
+    const prevCommentsComponent = this.#commentsComponent;
+    this.#commentsComponent = new CommentsView(comments);
+    this.#commentsComponent.setFormSubmitHandler(this.#handleFormSubmit);
+    this.#commentsComponent.setDeleteBtnClickHandler(this.#handleDeleteBtnClick);
+
+    if (prevCommentsComponent === null) {
+      render(this.#commentsComponent, this.#commentsComponent);
+      return;
+    }
+    replace(this.#commentsComponent, prevCommentsComponent);
+    remove(prevCommentsComponent);
+  };
+
+  setSaving = () => (this.#isSaving = true);
+
+  setDeleting = () => {
+    this.#isDeleting = true;
+    this.#deleteBtn.textContent = 'Deleting...';
+  };
+
+  setFilmAborting = () => this.#detailsComponent.shake();
+
+  setAborting = () => {
+    this.#commentsComponent.shake();
+    this.#isSaving = false;
+    this.#isDeleting = false;
+    if (this.#deleteBtn) {
+      this.#deleteBtn.textContent = 'Delete';
+    }
+  };
+
+  #renderPopup = () => {
     if (this.#popupComponent !== null) {
       remove(this.#popupComponent);
     }
-    if (this.#film !== null) {
-      this.#film = null;
+    this.#popupComponent = new PopupView(this.#film);
+    this.#popupComponent.setCloseBtnClickHandler(() => this.destroy());
+    this.#popupComponent.setEscKeydownHandler(() => this.destroy());
+  };
+
+  #renderDetails = () => {
+    this.#detailsComponent = new DetailsView(this.#film.userDetails);
+    this.#detailsComponent.setWatchlistClickHandler(this.#handleWatchlistClick);
+    this.#detailsComponent.setWatchedClickHandler(this.#handleWatchedClick);
+    this.#detailsComponent.setFavoriteClickHandler(this.#handleFavoriteClick);
+    render(this.#detailsComponent, this.#popupComponent.detailsContainer);
+  };
+
+  #renderComments = () => {
+    if (this.isLoading) {
+      render(this.#loadingComponent, this.#popupComponent.commentsContainer);
+      return;
     }
-  }
+    this.#commentsComponent = new CommentsView(this.#commentsModel.comments);
+    this.#commentsComponent.setFormSubmitHandler(this.#handleFormSubmit);
+    this.#commentsComponent.setDeleteBtnClickHandler(this.#handleDeleteBtnClick);
+
+    render(this.#commentsComponent, this.#popupComponent.commentsContainer);
+  };
 
   #handleWatchlistClick = () => {
     this.#film.userDetails.watchlist = !this.#film.userDetails.watchlist;
-
-    this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.PATCH, this.#film);
+    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
   };
 
   #handleWatchedClick = () => {
     this.#film.userDetails.alreadyWatched = !this.#film.userDetails.alreadyWatched;
-
-    this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.PATCH, this.#film);
+    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
   };
 
   #handleFavoriteClick = () => {
     this.#film.userDetails.favorite = !this.#film.userDetails.favorite;
-
-    this.#handleViewAction(UserAction.UPDATE_FILM, UpdateType.PATCH, this.#film);
+    this.#changeData(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#film);
   };
 
-  #handleViewAction = async (actionType, updateType, update) => {
-    this.#uiBlocker.block();
-
-    switch (actionType) {
-      case UserAction.UPDATE_FILM:
-        await this.#filmsModel.updateFilm(updateType, update);
-        break;
-
-      default:
-        throw new Error('Undefined user action');
-    }
-
-    this.#uiBlocker.unblock();
-  };
-
-  #handleModelEvent = (updateType, data) => {
-    if (this.#popupComponent !== null) {
-      const scrollPosition = this.#popupComponent.element.scrollTop;
-
-      switch (updateType) {
-        case UpdateType.PATCH:
-          this.destroy();
-          this.init(data);
-          break;
-      }
-
-      this.#popupComponent.element.scroll(0, scrollPosition);
+  #handleFormSubmit = (newComment) => {
+    if (!this.#isSaving && newComment.comment && newComment.emotion) {
+      this.#changeData(UserAction.ADD_COMMENT, UpdateType.PATCH, { film: this.#film, comment: newComment });
     }
   };
 
-  #renderComments = () => {
-    const comments = this.#commentsModel.comments;
-    const commentsPresenter = new CommentsPresenter(this.#popupComponent.commentsContainer, this.#commentsModel);
-    commentsPresenter.init(comments);
+  #handleDeleteBtnClick = (evt) => {
+    if (!this.#isDeleting) {
+      this.#deleteBtn = evt.target;
+
+      this.#changeData(UserAction.DELETE_COMMENT, UpdateType.PATCH, evt.target.dataset.id);
+    }
   };
 }

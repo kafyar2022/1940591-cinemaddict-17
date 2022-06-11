@@ -1,4 +1,3 @@
-const FILMS_COUNT = 18;
 const FILM_COUNT_PER_STEP = 5;
 const AUTHORIZATION = 'Basic dsfjhskdfjsldf';
 const END_POINT = 'https://17.ecmascript.pages.academy/cinemaddict';
@@ -48,8 +47,13 @@ const UiBlockTimeLimit = {
   UPPER_LIMIT: 1000,
 };
 
+const PopupMode = {
+  DEFAULT: 'closed',
+  OPENED: 'opened',
+  CLOSED: 'closed',
+};
+
 export {
-  FILMS_COUNT,
   FILM_COUNT_PER_STEP,
   FilterType,
   SortType,
@@ -60,4 +64,5 @@ export {
   AUTHORIZATION,
   END_POINT,
   UiBlockTimeLimit,
+  PopupMode,
 };
