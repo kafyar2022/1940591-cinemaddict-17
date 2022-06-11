@@ -35,6 +35,15 @@ export default class FilmPresenter {
     remove(prevFilmComponent);
   }
 
+  resetComments = (newComments) => {
+    this.#film = {
+      ...this.#film,
+      comments: newComments.map((comment) => comment.id),
+    };
+
+    this.init(this.#film);
+  };
+
   destroy = () => {
     remove(this.#filmComponent);
   };

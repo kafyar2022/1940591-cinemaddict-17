@@ -181,9 +181,8 @@ export default class FilmsPresenter {
   #handleModelEvent = (updateType, data) => {
     switch (updateType) {
       case UpdateType.PATCH:
-        if (data) {
-          this.#filmPresenters.get(data.movie.id).init(data.movie);
-          this.#popupPresenter.resetComments(data.comments);
+        if (this.#filmPresenters.get(this.#popupPresenter.film.id)) {
+          this.#filmPresenters.get(this.#popupPresenter.film.id).resetComments(this.#commentsModel.comments);
         }
         this.#popupPresenter.resetComments(this.#commentsModel.comments);
         break;

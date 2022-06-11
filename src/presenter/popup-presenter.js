@@ -112,7 +112,9 @@ export default class PopupPresenter {
     this.#commentsComponent.shake();
     this.#isSaving = false;
     this.#isDeleting = false;
-    this.#deleteBtn.textContent = 'Delete';
+    if (this.#deleteBtn) {
+      this.#deleteBtn.textContent = 'Delete';
+    }
   };
 
   #renderPopup = () => {
