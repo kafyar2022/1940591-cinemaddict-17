@@ -7,7 +7,7 @@ const createProfileTemplate = () => `
   </section>
 `;
 
-export default class ProfileView extends AbstractView {
+export default class UserRankView extends AbstractView {
   get template() {
     return createProfileTemplate();
   }

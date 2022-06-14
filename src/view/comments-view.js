@@ -84,6 +84,13 @@ export default class CommentsView extends AbstractStatefulView {
     this.element.addEventListener('click', this.#deleteBtnClickHandler);
   };
 
+
+  _restoreHandlers = () => {
+    this.#setInnerHandlers();
+    this.setFormSubmitHandler(this._callback.formSubmit);
+    this.setDeleteBtnClickHandler(this._callback.deleteComment);
+  };
+
   static parseCommentsToState = (comments) => ({
     'comments': [...comments],
     'newComment': {
@@ -91,12 +98,6 @@ export default class CommentsView extends AbstractStatefulView {
       emotion: null,
     },
   });
-
-  _restoreHandlers = () => {
-    this.#setInnerHandlers();
-    this.setFormSubmitHandler(this._callback.formSubmit);
-    this.setDeleteBtnClickHandler(this._callback.deleteComment);
-  };
 
   #formSubmitHandler = (evt) => {
     if (evt.ctrlKey && evt.keyCode === 13) {

@@ -8,10 +8,10 @@ export default class LoadMoreBtnView extends AbstractView {
   setClickHandler = (cb) => {
     this._callback.click = cb;
 
-    this.element.addEventListener('click', this.#handleClick);
+    this.element.addEventListener('click', this.#handleBtnClick);
   };
 
-  #handleClick = (evt) => {
+  #handleBtnClick = (evt) => {
     evt.preventDefault();
     this._callback.click();
   };

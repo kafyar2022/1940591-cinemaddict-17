@@ -113,6 +113,8 @@ export default class PopupView extends AbstractView {
     evt.preventDefault();
 
     document.body.classList.remove('hide-overflow');
+    document.removeEventListener('keydown', this.#escKeydownHandler);
+
     this._callback.closeBtnClick();
   };
 
@@ -121,6 +123,8 @@ export default class PopupView extends AbstractView {
       evt.preventDefault();
 
       document.body.classList.remove('hide-overflow');
+      document.removeEventListener('keydown', this.#escKeydownHandler);
+
       this._callback.escKeydown();
     }
   };
