@@ -91,14 +91,6 @@ export default class CommentsView extends AbstractStatefulView {
     this.setDeleteBtnClickHandler(this._callback.deleteComment);
   };
 
-  static parseCommentsToState = (comments) => ({
-    'comments': [...comments],
-    'newComment': {
-      comment: null,
-      emotion: null,
-    },
-  });
-
   #formSubmitHandler = (evt) => {
     if (evt.ctrlKey && evt.keyCode === 13) {
       this._callback.formSubmit(this._state.newComment);
@@ -129,4 +121,12 @@ export default class CommentsView extends AbstractStatefulView {
       this._callback.deleteComment(evt);
     }
   };
+
+  static parseCommentsToState = (comments) => ({
+    'comments': [...comments],
+    'newComment': {
+      comment: null,
+      emotion: null,
+    },
+  });
 }
